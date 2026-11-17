@@ -1,0 +1,12 @@
+{
+  "version": 1,
+  "settings": [
+    {
+      "key": "verbose_logging",
+      "type": "boolean",
+      "default": true,
+      "title": "Log launcher icon mappings",
+      "apply": "rebuild"
+    }
+  ]
+}
