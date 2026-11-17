@@ -54,7 +54,8 @@ public final class IconPacks extends ModEntry {
                     if (pkg == null) return;
                     int kind = "hmgapi.app".equals(pkg) ? 0 :
                             "dev.lemoyne.tiles".equals(pkg) ? 1 :
-                            "com.nemesis.manager".equals(pkg) ? 2 : -1;
+                            "com.nemesis.manager".equals(pkg) ? 2 :
+                            "dev.lemoyne.comfort".equals(pkg) ? 3 : -1;
                     if (kind < 0) return;
                     Bitmap image = render(kind);
                     Resources res = (Resources) p.thisObject;
@@ -80,7 +81,24 @@ public final class IconPacks extends ModEntry {
         p.setShader(new LinearGradient(12, 12, 88, 88,
                 new int[]{Color.rgb(55,237,255), Color.rgb(123,110,255), Color.rgb(255,88,220)},
                 null, Shader.TileMode.CLAMP));
-        if (kind == 1) { // Tile Manager: three rounded boxes, checkmark; NO outer border
+        if (kind == 3) { // Comfort: heated seat and three heat waves
+            Path seat = new Path();
+            seat.moveTo(25,24); seat.lineTo(25,58);
+            seat.quadTo(25,66,34,66);
+            seat.lineTo(64,66);
+            seat.quadTo(73,66,73,74);
+            seat.lineTo(73,86);
+            c.drawPath(seat,p);
+            c.drawLine(30,85,76,85,p);
+            for (int i = 0; i < 3; i++) {
+                float x = 39 + i * 13;
+                Path wave = new Path();
+                wave.moveTo(x,14);
+                wave.cubicTo(x-9,22,x+9,27,x,36);
+                wave.cubicTo(x-9,44,x+9,49,x,55);
+                c.drawPath(wave,p);
+            }
+        } else if (kind == 1) { // Tile Manager: three rounded boxes, checkmark; NO outer border
             box(c,p,13,13,43,43,6);
             box(c,p,57,13,87,43,6);
             box(c,p,13,57,43,87,6);
