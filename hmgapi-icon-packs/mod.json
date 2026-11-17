@@ -1,11 +1,9 @@
 {
   "id": "hmgapi-icon-packs",
   "name": "HMGAPI Icon Packs (POC)",
-  "version": "0.1.0",
+  "version": "0.1.0-rc.1",
   "hmgapi": ">=1.1.0-rc.3",
-  "authors": [
-    "Nyx-Asteria"
-  ],
+  "authors": ["Nyx-Asteria"],
   "license": "MIT",
   "description": "Diagnostic proof of concept for mapping Gen5W launcher entries to package names and icon resource IDs. Does not replace icons yet.",
   "hooks": {
