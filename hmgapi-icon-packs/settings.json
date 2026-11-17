@@ -2,6 +2,13 @@
   "version": 1,
   "settings": [
     {
+      "key": "enable_overrides",
+      "type": "boolean",
+      "default": true,
+      "title": "Replace three launcher icons",
+      "apply": "rebuild"
+    },
+    {
       "key": "verbose_logging",
       "type": "boolean",
       "default": true,
