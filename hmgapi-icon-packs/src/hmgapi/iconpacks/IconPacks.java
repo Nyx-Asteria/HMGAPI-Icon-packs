@@ -8,6 +8,7 @@ import android.graphics.LinearGradient;
 import android.graphics.Paint;
 import android.graphics.Path;
 import android.graphics.Shader;
+import android.graphics.RectF;
 import android.graphics.drawable.BitmapDrawable;
 import hmgapi.hook.LoadedApp;
 import hmgapi.hook.MethodHook;
@@ -111,6 +112,6 @@ public final class IconPacks extends ModEntry {
     }
 
     private static void box(Canvas c, Paint p, float l, float t, float r, float b, float radius) {
-        c.drawRoundRect(l,t,r,b,radius,radius,p);
+        c.drawRoundRect(new RectF(l,t,r,b),radius,radius,p);
     }
 }
