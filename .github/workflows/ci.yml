@@ -1,0 +1,10 @@
+name: Build and test HMGAPI Icon Packs
+on:
+  push:
+    branches: [main]
+  pull_request:
+permissions:
+  contents: read
+jobs:
+  mod:
+    uses: Open-HMG/HMG-API/.github/workflows/mod.yml@b459567eed0a4c5645efe2deb349b46a3523a422
