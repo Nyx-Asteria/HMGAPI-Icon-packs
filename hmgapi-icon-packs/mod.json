@@ -13,7 +13,8 @@
     "entry": "hmgapi.iconpacks.IconPacks",
     "points": {
       "launcher.menu_entry.new": "change",
-      "framework.resources.get_drawable": "replace"
+      "framework.resources.get_drawable": "replace",
+      "launcher.menu_list.load": "observe"
     }
   }
 }
