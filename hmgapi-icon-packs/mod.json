@@ -1,13 +1,13 @@
 {
   "id": "hmgapi-icon-packs",
   "name": "HMGAPI Icon Packs",
-  "version": "1.0.0-rc.9",
+  "version": "1.0.0-rc.10",
   "hmgapi": ">=1.1.0-rc.3",
   "authors": [
     "Nyx-Asteria"
   ],
   "license": "MIT",
-  "description": "PNG overrides for HMG-API launcher tiles and Kia and Hyundai icon-pack preview for factory and mod tiles.",
+  "description": "Selectable Kia and Hyundai PNG icon packs for mod tiles, with runtime factory icon replacements.",
   "hooks": {
     "jar": "hooks.jar",
     "entry": "hmgapi.iconpacks.IconPacks",

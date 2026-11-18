@@ -1,18 +1,15 @@
 # HMGAPI Icon Packs
 
-## RC9 — integrated Kia / Hyundai theme preview
+## RC10 — selectable PNG icon packs
 
-RC9 adds a **Hyundai icon pack** toggle in HMG-API mod settings. Off = Kia, on = Hyundai. The setting applies on rebuild/restart; it is not a live theme switch.
+The mod provides two themes for the six HMG-API launcher tiles: **Kia** and **Hyundai**. All twelve plugin icons are separate PNG files stored under `hmgapi-icon-packs/icons/kia/` and `hmgapi-icon-packs/icons/hyundai/`. They are loaded during zygote initialization and applied to the HMG-API launcher entries in memory.
 
-- Replaces six HMG-API-managed mod icons: HMG-API, Tile Manager, NEMESIS, Comfort, Button Mapper, and Brake Indicator.
-- Uses existing `launcher.menu_entry.new`, `launcher.menu_list.load`, and `framework.resources.get_drawable` points to identify and replace recognized factory icons.
-- Distinguishes Setup vs User's Manual and Map vs Navigation Menu by activity name.
-- No factory APK modifications or new HMG-API points.
-- Preserves the four tested RC7 Kia PNG assets; new plugin icons and factory artwork are generated vector previews at runtime.
-- Hyundai uses blue/cyan/green gradients on **transparent backgrounds**; Kia uses cyan/violet/magenta. Setup uses the cog rather than the RC8 test checkmark.
+In HMG-API mod settings, turn **Hyundai icon pack** on for Hyundai, or off for Kia (default). Rebuild/restart for changes to take effect. **Enable icon replacements** disables all replacements when off.
 
-**Important:** This is an *experimental integrated build*, not a pixel-perfect export of the approved concept sheets. Factory coverage depends on matching entry identities and the drawable resource owner. Unmatched entries retain their stock icons. The Hyundai style is an original interpretation, not extracted OEM artwork.
+Plugin tiles: HMG-API, NEMESIS, Tile Manager, Comfort, Button Mapper, and Brake Indicator.
 
-The last head-unit-confirmed factory replacement is RC8; the frozen RC7 fallback is at `backup/rc7-before-cleanup`.
+Factory icons are handled separately through existing launcher hooks and runtime Canvas drawing; factory APKs are never modified. The factory replacements are experimental and depend on the firmware's entry identities and drawable resources. Unmatched icons remain unchanged.
 
-[Download test builds from Releases](https://github.com/Nyx-Asteria/HMGAPI-Icon-packs/releases). CI uses temporary signatures.
+The `backup/rc7-before-cleanup` branch preserves the known-working four-icon fallback. CI test packages use temporary signatures.
+
+[Releases](https://github.com/Nyx-Asteria/HMGAPI-Icon-packs/releases)

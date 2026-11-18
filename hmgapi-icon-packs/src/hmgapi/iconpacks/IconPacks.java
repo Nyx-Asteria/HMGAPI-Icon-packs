@@ -24,7 +24,7 @@ import java.util.List;
  * Original factory APKs and their resources are never modified.
  *
  * Load PNGs during zygote initialization, when mod.dir is accessible.
- * Patch the four HMG-API LauncherEntry icon byte arrays in launcher process.
+ * Patch HMG-API LauncherEntry icon byte arrays in the launcher process.
  */
 public final class IconPacks extends ModEntry {
     private static final String[] NAMES = {"hmgapi", "tiles", "nemesis", "comfort", "buttonmapper", "brakeindicator"};
@@ -41,15 +41,8 @@ public final class IconPacks extends ModEntry {
     @Override public void zygoteInit(ModContext mod) {
         hyundai = mod.settingBoolean("hyundai_style", false);
         for (int i = 0; i < NAMES.length; i++) {
-            if (hyundai || i >= 4) {
-                Bitmap bitmap = drawIcon(NAMES[i], hyundai);
-                ByteArrayOutputStream output = new ByteArrayOutputStream();
-                bitmap.compress(Bitmap.CompressFormat.PNG, 100, output);
-                pictures[i] = output.toByteArray();
-                bitmap.recycle();
-                continue;
-            }
-            File file = new File(mod.dir, "icons/" + NAMES[i] + ".png");
+            File file = new File(mod.dir, "icons/" + (hyundai ? "hyundai" : "kia")
+                    + "/" + NAMES[i] + ".png");
             try {
                 FileInputStream in = new FileInputStream(file);
                 ByteArrayOutputStream out = new ByteArrayOutputStream();
