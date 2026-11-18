@@ -33,6 +33,8 @@ public final class IconPacks extends ModEntry {
     private final boolean[] patched = new boolean[4];
     private int canvasFallback;
     private int drawableSeen;
+    private final java.util.Set<Integer> setupIds = new java.util.HashSet<Integer>();
+    private int factoryReplaced;
 
     private static String packageOf(int kind) {
         switch (kind) {
@@ -112,6 +114,32 @@ public final class IconPacks extends ModEntry {
             }
         }
 
+        // Observe existing launcher entry constructor to discover Setup's icon IDs.
+        mod.hook(app.classLoader, "launcher.menu_entry.new", new MethodHook() {
+            @Override protected void afterHookedMethod(Param p) {
+                try {
+                    if (p.args.length < 7) return;
+                    String pkg = String.valueOf(p.args[2]);
+                    String activity = String.valueOf(p.args[3]);
+                    int enabled = ((Number) p.args[4]).intValue();
+                    int disabled = ((Number) p.args[5]).intValue();
+                    String identity = (pkg + " " + activity).toLowerCase(java.util.Locale.US);
+                    if (identity.contains("setting") || identity.contains("setup")) {
+                        setupIds.add(enabled);
+                        setupIds.add(disabled);
+                        mod.log("RC8 SETUP candidate " + pkg + " / " + activity
+                                + " enabled=0x" + Integer.toHexString(enabled)
+                                + " disabled=0x" + Integer.toHexString(disabled));
+                    } else {
+                        mod.log("RC8 entry " + pkg + " / " + activity
+                                + " icon=0x" + Integer.toHexString(enabled));
+                    }
+                } catch (Throwable error) {
+                    mod.error("RC8 factory entry inspection", error);
+                }
+            }
+        });
+
         // Fallback: keep the ORIGINAL HMG-API synthetic IDs. No constructor mutation.
         // This path may be bypassed by HMG-API's earlier resource hook.
         mod.hook(null, "framework.resources.get_drawable", new MethodHook() {
@@ -124,7 +152,15 @@ public final class IconPacks extends ModEntry {
                     if (id == 0x7f7e0007 || id == 0x7f7e0008) kind = 1;
                     if (id == 0x7f7e000a || id == 0x7f7e000b) kind = 2;
                     if (id == 0x7f7e0004 || id == 0x7f7e0005) kind = 3;
-                    if (kind < 0) return;
+                    if (kind < 0) {
+                        if (!setupIds.contains(id)) return;
+                        Resources res = (Resources) p.thisObject;
+                        p.setResult(new BitmapDrawable(res, renderSetupTest()));
+                        factoryReplaced++;
+                        if (factoryReplaced <= 20)
+                            mod.log("RC8 SETUP drawable replaced id=0x" + Integer.toHexString(id));
+                        return;
+                    }
                     drawableSeen++;
                     if (patched[kind]) {
                         if (drawableSeen <= 12) mod.log("PNG resolver observed " + packageOf(kind));
@@ -140,10 +176,47 @@ public final class IconPacks extends ModEntry {
         mod.hook(app.classLoader, "launcher.menu_list.load", new MethodHook() {
             @Override protected void afterHookedMethod(Param p) {
                 mod.log("RC7 menu event PNG patched=" + pngPatched
-                    + " drawable observed=" + drawableSeen + " Canvas fallback=" + canvasFallback);
+                    + " drawable observed=" + drawableSeen + " Canvas fallback=" + canvasFallback
+                    + " setupIds=" + setupIds.size() + " factoryReplaced=" + factoryReplaced);
             }
         });
         mod.log("RC7 hooks installed; PNG patches=" + pngPatched);
+    }
+
+    private static Bitmap renderSetupTest() {
+        Bitmap b = Bitmap.createBitmap(128, 128, Bitmap.Config.ARGB_8888);
+        Canvas c = new Canvas(b);
+        Paint p = new Paint(Paint.ANTI_ALIAS_FLAG);
+        p.setColor(Color.rgb(28, 8, 46));
+        c.drawRoundRect(new RectF(3, 3, 125, 125), 24, 24, p);
+        p.setColor(Color.MAGENTA);
+        p.setStyle(Paint.Style.STROKE);
+        p.setStrokeWidth(8);
+        c.drawRoundRect(new RectF(6, 6, 122, 122), 22, 22, p);
+        p.setStyle(Paint.Style.FILL);
+        p.setColor(Color.WHITE);
+        Path gear = new Path();
+        for (int i = 0; i < 32; i++) {
+            double a = 2 * Math.PI * i / 32 - Math.PI / 2;
+            float radius = (i % 4 == 0 || i % 4 == 3) ? 43 : 34;
+            float x = 64 + (float) Math.cos(a) * radius;
+            float y = 64 + (float) Math.sin(a) * radius;
+            if (i == 0) gear.moveTo(x, y); else gear.lineTo(x, y);
+        }
+        gear.close();
+        c.drawPath(gear, p);
+        p.setColor(Color.rgb(28, 8, 46));
+        c.drawCircle(64, 64, 22, p);
+        p.setColor(Color.GREEN);
+        p.setStyle(Paint.Style.STROKE);
+        p.setStrokeWidth(9);
+        p.setStrokeCap(Paint.Cap.ROUND);
+        Path check = new Path();
+        check.moveTo(49, 64);
+        check.lineTo(60, 76);
+        check.lineTo(82, 51);
+        c.drawPath(check, p);
+        return b;
     }
 
     private static Bitmap render(int kind) {
