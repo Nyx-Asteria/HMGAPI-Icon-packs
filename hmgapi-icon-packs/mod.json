@@ -1,18 +1,18 @@
 {
   "id": "hmgapi-icon-packs",
   "name": "HMGAPI Icon Packs",
-  "version": "1.0.0-rc.4",
+  "version": "1.0.0-rc.5",
   "hmgapi": ">=1.1.0-rc.3",
   "authors": [
     "Nyx-Asteria"
   ],
   "license": "MIT",
-  "description": "Experimental Gen5W launcher icon overrides with focused drawable diagnostics.",
+  "description": "Experimental launcher constructor ID redirection and drawable replacement.",
   "hooks": {
     "jar": "hooks.jar",
     "entry": "hmgapi.iconpacks.IconPacks",
     "points": {
-      "launcher.menu_entry.new": "observe",
+      "launcher.menu_entry.new": "change",
       "framework.resources.get_drawable": "replace"
     }
   }
