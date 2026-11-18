@@ -9,10 +9,21 @@
       "apply": "rebuild"
     },
     {
-      "key": "hyundai_style",
-      "type": "boolean",
-      "default": false,
-      "title": "Hyundai icon pack (off = Kia)",
+      "key": "icon_pack",
+      "type": "choice",
+      "default": "kia",
+      "title": "Icon pack",
+      "description": "Select which vehicle style to use. Save and Apply changes to activate.",
+      "options": [
+        {
+          "value": "kia",
+          "title": "Kia — neon outline"
+        },
+        {
+          "value": "hyundai",
+          "title": "Hyundai — blue to green"
+        }
+      ],
       "apply": "rebuild"
     }
   ]

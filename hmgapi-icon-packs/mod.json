@@ -1,7 +1,7 @@
 {
   "id": "hmgapi-icon-packs",
   "name": "HMGAPI Icon Packs",
-  "version": "1.0.0-rc.10",
+  "version": "1.0.0-rc.11",
   "hmgapi": ">=1.1.0-rc.3",
   "authors": [
     "Nyx-Asteria"

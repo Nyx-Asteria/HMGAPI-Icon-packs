@@ -39,7 +39,8 @@ public final class IconPacks extends ModEntry {
     private int factoryReplacements;
 
     @Override public void zygoteInit(ModContext mod) {
-        hyundai = mod.settingBoolean("hyundai_style", false);
+        hyundai = "hyundai".equals(mod.settingString("icon_pack", "kia"));
+        mod.log("Icon pack selected: " + (hyundai ? "hyundai" : "kia"));
         for (int i = 0; i < NAMES.length; i++) {
             File file = new File(mod.dir, "icons/" + (hyundai ? "hyundai" : "kia")
                     + "/" + NAMES[i] + ".png");
