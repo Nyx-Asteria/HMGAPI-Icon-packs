@@ -30,6 +30,7 @@ public final class IconPacks extends ModEntry {
     private final byte[][] pictures = new byte[4][];
     private boolean hooked;
     private int pngPatched;
+    private final boolean[] patched = new boolean[4];
     private int canvasFallback;
     private int drawableSeen;
 
@@ -102,6 +103,7 @@ public final class IconPacks extends ModEntry {
                         f.set(entry, png);
                     }
                     pngPatched++;
+                    patched[kind] = true;
                     mod.log("PNG PRIMARY patched " + pkg + " bytes=" + png.length);
                 }
                 mod.log("PNG PRIMARY summary patched=" + pngPatched + "/4");
@@ -124,7 +126,7 @@ public final class IconPacks extends ModEntry {
                     if (id == 0x7f7e0004 || id == 0x7f7e0005) kind = 3;
                     if (kind < 0) return;
                     drawableSeen++;
-                    if (pictures[kind] != null && pngPatched > 0) {
+                    if (patched[kind]) {
                         if (drawableSeen <= 12) mod.log("PNG resolver observed " + packageOf(kind));
                         return;
                     }
