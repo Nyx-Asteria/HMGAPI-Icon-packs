@@ -39,7 +39,7 @@ public final class IconPacks extends ModEntry {
                 try {
                     String pkg = String.valueOf(p.args[2]);
                     int kind = kindOf(pkg);
-                    if (kind < 0) return;
+                    if (kind < 0 || !mod.settingBoolean("enable_overrides", true)) return;
                     // Path A: redirect target tiles to IDs that HMG-API's core does NOT claim.
                     // Path B: our getDrawable hook resolves these IDs before Android can reject them.
                     int normal = CUSTOM_BASE + kind * 2 + 1;
@@ -67,7 +67,7 @@ public final class IconPacks extends ModEntry {
             @Override protected void beforeHookedMethod(Param p) {
                 try {
                     int id = ((Number) p.args[0]).intValue();
-                    if ((id & 0xffffff00) == CUSTOM_BASE) {
+                    if (mod.settingBoolean("enable_overrides", true) && (id & 0xffffff00) == CUSTOM_BASE) {
                         int kind = (id - CUSTOM_BASE - 1) / 2;
                         if (kind >= 0 && kind < 4) {
                             p.setResult(new BitmapDrawable((Resources) p.thisObject, render(kind)));
@@ -113,7 +113,14 @@ public final class IconPacks extends ModEntry {
                 } catch (Throwable t) { mod.error("icon replacement", t); }
             }
         });
-        mod.log("RC5 drawable resolver installed; constructor redirects=" + redirectedCount);
+        mod.hook(app.classLoader, "launcher.menu_list.load", new MethodHook() {
+            @Override protected void afterHookedMethod(Param p) {
+                mod.log("PATH D menu load completed; redirects=" + redirectedCount
+                        + " custom drawable requests=" + syntheticCount
+                        + " ordinary drawable requests=" + afterCount);
+            }
+        });
+        mod.log("RC5 drawable resolver and menu-load observer installed");
     }
 
     private static int kindOf(String pkg) {
