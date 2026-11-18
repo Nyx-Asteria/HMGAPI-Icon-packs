@@ -1,0 +1,13 @@
+{
+  "id": "hmgapi-icon-packs",
+  "name": "HMGAPI Icon Packs",
+  "version": "1.0.0-rc.7",
+  "hmgapi": ">=1.1.0-rc.3",
+  "authors": ["Nyx-Asteria"],
+  "license": "MIT",
+  "description": "PNG launcher icons for HMG-API-managed tiles; no factory APK modifications.",
+  "hooks": {
+    "jar": "hooks.jar",
+    "entry": "hmgapi.iconpacks.IconPacks"
+  }
+}

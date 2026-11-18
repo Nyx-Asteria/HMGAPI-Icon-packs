@@ -1,0 +1,59 @@
+name: Build and test HMGAPI Icon Packs
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+
+permissions:
+  contents: read
+  actions: read
+
+jobs:
+  mod:
+    uses: Open-HMG/HMG-API/.github/workflows/mod.yml@b459567eed0a4c5645efe2deb349b46a3523a422
+
+  download:
+    name: Download test package
+    needs: mod
+    runs-on: ubuntu-24.04
+    steps:
+      - name: Check out version metadata
+        uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          persist-credentials: false
+
+      - name: Set artifact name from mod.json
+        id: package
+        run: |
+          set -eu
+          version=$(python3 -c 'import json; print(json.load(open("hmgapi-icon-packs/mod.json"))["version"])')
+          echo "name=HMGAPI-Icon-Packs-$version" >> "$GITHUB_OUTPUT"
+
+      - name: Retrieve signed test packages
+        uses: actions/download-artifact@v4
+        with:
+          name: mod-test-packages
+          path: test-packages
+
+      - name: Publish versioned test artifact
+        id: upload
+        uses: actions/upload-artifact@v4
+        with:
+          name: ${{ steps.package.outputs.name }}
+          path: test-packages/
+          if-no-files-found: error
+          retention-days: 14
+
+      - name: Final download summary
+        env:
+          PACKAGE_NAME: ${{ steps.package.outputs.name }}
+          PACKAGE_URL: ${{ steps.upload.outputs.artifact-url }}
+        run: |
+          {
+            echo "## 📦 $PACKAGE_NAME"
+            echo ""
+            echo "**[Download test package]($PACKAGE_URL)**"
+            echo ""
+            echo "Temporary CI signing key — not a stable author-signed release."
+          } >> "$GITHUB_STEP_SUMMARY"
