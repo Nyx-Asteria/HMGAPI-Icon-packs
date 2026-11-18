@@ -5,14 +5,7 @@
       "key": "enable_overrides",
       "type": "boolean",
       "default": true,
-      "title": "Replace four launcher icons",
-      "apply": "rebuild"
-    },
-    {
-      "key": "verbose_logging",
-      "type": "boolean",
-      "default": true,
-      "title": "Log drawable diagnostics",
+      "title": "Replace HMG-API launcher icons",
       "apply": "rebuild"
     }
   ]

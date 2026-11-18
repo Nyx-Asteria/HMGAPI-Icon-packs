@@ -3,17 +3,11 @@
   "name": "HMGAPI Icon Packs",
   "version": "1.0.0-rc.7",
   "hmgapi": ">=1.1.0-rc.3",
-  "authors": [
-    "Nyx-Asteria"
-  ],
+  "authors": ["Nyx-Asteria"],
   "license": "MIT",
-  "description": "PNG-first launcher icon override via HMG-API in-memory icon bytes; Canvas fallback.",
+  "description": "PNG launcher icons for HMG-API-managed tiles; no factory APK modifications.",
   "hooks": {
     "jar": "hooks.jar",
-    "entry": "hmgapi.iconpacks.IconPacks",
-    "points": {
-      "framework.resources.get_drawable": "replace",
-      "launcher.menu_list.load": "observe"
-    }
+    "entry": "hmgapi.iconpacks.IconPacks"
   }
 }

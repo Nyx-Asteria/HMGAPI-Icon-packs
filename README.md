@@ -1,20 +1,31 @@
 # HMGAPI Icon Packs
 
-Experimental launcher icon replacement for Hyundai/Kia/Genesis Gen5W using [HMG-API](https://github.com/Open-HMG/HMG-API).
+Runtime PNG icon replacement for HMG-API-managed launcher tiles on Hyundai/Kia/Genesis Gen5W systems.
 
-**Current version:** 1.0.0-rc.4 (prerelease; diagnostic testing on DL322).
+**Known-good baseline:** RC7 was tested on a Kia K5 DL322 and displayed custom icons for HMG-API, Tile Manager, Nemesis, and Comfort. This cleanup branch simplifies the implementation and has **not yet been tested on the car**.
 
-## Included icon designs
+## Current icons
 
 - HMG-API — dashboard
-- Tile Manager — three boxes and a checkmark
-- Nemesis Shortcut — settings cog
+- Tile Manager — tiles and checkmark
+- Nemesis — settings cog
 - Comfort — heated seat
 
-Icons are rendered as gradient drawables at runtime. The factory APKs are not modified.
+Editable SVG source artwork and 64×64 transparent PNG assets are under `hmgapi-icon-packs/icons/`.
 
-## Builds
+## How it works
 
-Open [GitHub Actions](https://github.com/Nyx-Asteria/HMGAPI-Icon-packs/actions). Successful builds have a final **Download test package** job, which publishes an artifact named `HMGAPI-Icon-Packs-<version>` and a link in the run summary. Test artifacts are signed with **temporary keys**; they are not persistent release signatures.
+The mod preloads PNG files in `zygoteInit` and replaces the icon byte arrays on HMG-API's in-memory launcher entries when `com.android.launcher3` loads. It does **not** patch system APKs or modify factory resources.
 
-See [DL322 testing instructions](docs/TESTING.md). The drawable override is experimental and may not execute because of HMG-API core hook ordering.
+This mechanism is proven for HMG-API-managed entries only. Replacing factory Kia/Hyundai icons is a separate experiment.
+
+## Building and testing
+
+GitHub Actions uses the pinned HMG-API SDK and publishes temporary-key-signed test artifacts. See [testing instructions](docs/TESTING.md). A stable signing identity is not configured; temporary CI signatures should not be treated as production releases.
+
+## Development
+
+- `main`: tested RC7 baseline until cleanup is validated
+- `backup/rc7-before-cleanup`: immutable recovery point for pre-cleanup history
+- `cleanup/png-engine`: streamlined PNG-only engine (requires validation)
+- `experiment/rc8-factory-setup`: factory Setup icon investigation

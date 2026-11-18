@@ -1,17 +1,20 @@
-# First DL322 test
+# Testing on DL322
 
-Current RC4 attempts runtime icon replacement for four mod tiles and logs drawable hook callbacks. It does not modify factory APKs.
+## Known-good version
 
-1. Open the repository's Actions tab and inspect the latest **Build and test HMGAPI Icon Packs** run.
-2. Download the **HMGAPI-Icon-Packs-<version>** artifact. This CI package is signed with a **throwaway test key**, not a persistent author key. It is for an initial isolated test only; a future release signed with another key will not update over it.
-3. Install using HMG-API's normal mod installation route, while parked, with a known-good recovery procedure.
-4. Restart the head unit if HMG-API asks. Check the mod logs for `DIAG BEFORE`, `DIAG AFTER`, and `REPLACED` entries. Capture any error messages.
-5. Turn the mod off or remove it to return to the previous state.
+RC7 displayed all four HMG-API-managed custom icons on the Kia K5 DL322. The cleaned PNG-only implementation is not yet verified on the head unit.
 
-Next milestone: establish whether HMG-API's synthetic drawable resolver permits downstream overrides.
+1. Open the repository's [GitHub Actions](https://github.com/Nyx-Asteria/HMGAPI-Icon-packs/actions) page.
+2. Download the test artifact for the desired build; check the source branch and version before installing.
+3. Install through the normal HMG-API mod workflow while parked, with a recovery method available.
+4. Verify HMG-API, Tile Manager, Nemesis, and Comfort launcher icons.
+5. Check logs for `Loaded icon`, `Replaced icon for`, and `PNG icon overrides applied`.
+6. Disable or uninstall the mod to restore HMG-API's original icon data.
 
-## Signing for stable releases
+## Signing
 
-HMG-API mod packages use **author signing**, not Android APK signing. The SDK includes `hmgapi.engine.Signing` for key generation and `mkmodpkg.sh` for signed packages. Keep a permanent private key outside GitHub and provide it to a protected GitHub Actions release environment as `MOD_KEY` (base64 of the PKCS#8 private key). Commit only its public half. Never use CI's throwaway key for public releases. Once an author key signs a mod, updates must use the same key.
+CI packages use disposable signing keys. A future release must use a persistent author signing key (`MOD_KEY`) so updates retain the same identity. No persistent-key release workflow is configured.
 
-A persistent-key release workflow is not configured yet.
+## Factory icons
+
+The RC8 branch is an experimental investigation. Factory icon replacement has not been demonstrated, and no system APKs should be modified.
