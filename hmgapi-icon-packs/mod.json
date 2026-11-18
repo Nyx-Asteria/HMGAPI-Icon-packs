@@ -1,13 +1,13 @@
 {
   "id": "hmgapi-icon-packs",
   "name": "HMGAPI Icon Packs",
-  "version": "1.0.0-rc.5",
+  "version": "1.0.0-rc.6",
   "hmgapi": ">=1.1.0-rc.3",
   "authors": [
     "Nyx-Asteria"
   ],
   "license": "MIT",
-  "description": "Experimental launcher constructor ID redirection and drawable replacement.",
+  "description": "Experimental launcher icon overrides with constructor, stored-field and drawable diagnostics.",
   "hooks": {
     "jar": "hooks.jar",
     "entry": "hmgapi.iconpacks.IconPacks",
