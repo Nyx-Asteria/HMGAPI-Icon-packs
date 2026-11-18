@@ -1,59 +1,75 @@
-name: Build and test HMGAPI Icon Packs
+name: Build HMGAPI Icon Packs
 
 on:
   push:
     branches: [main]
-  pull_request:
+  workflow_dispatch:
 
 permissions:
   contents: read
-  actions: read
 
 jobs:
   mod:
     uses: Open-HMG/HMG-API/.github/workflows/mod.yml@b459567eed0a4c5645efe2deb349b46a3523a422
 
-  download:
-    name: Download test package
+  publish:
+    name: Publish direct test ZIP
     needs: mod
     runs-on: ubuntu-24.04
+    permissions:
+      contents: write
+      actions: read
     steps:
-      - name: Check out version metadata
+      - name: Check out version
         uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
         with:
           persist-credentials: false
 
-      - name: Set artifact name from mod.json
-        id: package
-        run: |
-          set -eu
-          version=$(python3 -c 'import json; print(json.load(open("hmgapi-icon-packs/mod.json"))["version"])')
-          echo "name=HMGAPI-Icon-Packs-$version" >> "$GITHUB_OUTPUT"
-
-      - name: Retrieve signed test packages
+      - name: Download SDK-built packages
         uses: actions/download-artifact@v4
         with:
           name: mod-test-packages
-          path: test-packages
+          path: packages
 
-      - name: Publish versioned test artifact
-        id: upload
-        uses: actions/upload-artifact@v4
-        with:
-          name: ${{ steps.package.outputs.name }}
-          path: test-packages/
-          if-no-files-found: error
-          retention-days: 14
-
-      - name: Final download summary
-        env:
-          PACKAGE_NAME: ${{ steps.package.outputs.name }}
-          PACKAGE_URL: ${{ steps.upload.outputs.artifact-url }}
+      - name: Select installable mod ZIP
+        id: package
+        shell: bash
         run: |
-          {
-            echo "## 📦 $PACKAGE_NAME"
-            echo ""
-            echo "**[Download test package]($PACKAGE_URL)**"
-            echo ""
-            echo "Temporary CI signing key — not a stable author-signed release."
-          } >> "$GITHUB_STEP_SUMMARY"
+          set -euo pipefail
+          version=$(python3 -c 'import json; print(json.load(open("hmgapi-icon-packs/mod.json"))["version"])')
+          mapfile -t matches < <(find packages -type f -name "hmgapi-icon-packs-*.zip" ! -iname "*nemesis*" | sort)
+          if [ "${#matches[@]}" -ne 1 ]; then
+            echo "::error::Expected exactly one HMG-API mod ZIP, found ${#matches[@]}"
+            find packages -type f -print
+            exit 1
+          fi
+          file="${matches[0]}"
+          unzip -Z1 "$file" | grep -qx 'META-HMGAPI/manifest.json'
+          unzip -Z1 "$file" | grep -qx 'hooks.jar'
+          unzip -Z1 "$file" | grep -qx 'mod.json'
+          mkdir -p dist
+          cp "$file" "dist/hmgapi-icon-packs-$version.zip"
+          echo "file=dist/hmgapi-icon-packs-$version.zip" >> "$GITHUB_OUTPUT"
+          echo "tag=testing-$version" >> "$GITHUB_OUTPUT"
+          echo "version=$version" >> "$GITHUB_OUTPUT"
+
+      - name: Publish direct ZIP as prerelease asset
+        env:
+          GH_TOKEN: ${{ github.token }}
+          GH_REPO: ${{ github.repository }}
+          FILE: ${{ steps.package.outputs.file }}
+          TAG: ${{ steps.package.outputs.tag }}
+          VERSION: ${{ steps.package.outputs.version }}
+        shell: bash
+        run: |
+          set -euo pipefail
+          if gh release view "$TAG" >/dev/null 2>&1; then
+            gh release upload "$TAG" "$FILE" --clobber
+          else
+            gh release create "$TAG" "$FILE" --target "$GITHUB_SHA" \
+              --title "$VERSION — experimental test build" --prerelease \
+              --notes "Experimental HMG-API mod package, signed with a temporary CI key. Do not treat as a stable author-signed release."
+          fi
+          echo "### Direct download" >> "$GITHUB_STEP_SUMMARY"
+          echo "[$(basename "$FILE")](https://github.com/$GH_REPO/releases/download/$TAG/$(basename "$FILE"))" >> "$GITHUB_STEP_SUMMARY"
+          echo "Experimental temporary-key signature; use only for testing." >> "$GITHUB_STEP_SUMMARY"

@@ -1,6 +1,15 @@
 package hmgapi.iconpacks;
 
+import android.content.res.Resources;
+import android.graphics.Bitmap;
+import android.graphics.Canvas;
+import android.graphics.Color;
+import android.graphics.Paint;
+import android.graphics.Path;
+import android.graphics.RectF;
+import android.graphics.drawable.BitmapDrawable;
 import hmgapi.hook.LoadedApp;
+import hmgapi.hook.MethodHook;
 import hmgapi.hook.ModContext;
 import hmgapi.hook.ModEntry;
 import java.io.ByteArrayOutputStream;
@@ -24,6 +33,9 @@ public final class IconPacks extends ModEntry {
     };
     private final byte[][] pictures = new byte[NAMES.length][];
     private boolean initialized;
+    private final java.util.Set<Integer> setupIds = new java.util.HashSet<Integer>();
+    private int setupRequests;
+    private int setupReplacements;
 
     @Override public void zygoteInit(ModContext mod) {
         for (int i = 0; i < NAMES.length; i++) {
@@ -59,6 +71,65 @@ public final class IconPacks extends ModEntry {
             return;
         }
 
+        // RC8: observe factory entries without changing their constructor arguments.
+        mod.hook(app.classLoader, "launcher.menu_entry.new", new MethodHook() {
+            @Override protected void afterHookedMethod(Param p) {
+                try {
+                    if (p.args.length < 7) return;
+                    String pkg = String.valueOf(p.args[2]);
+                    String activity = String.valueOf(p.args[3]);
+                    int enabled = ((Number) p.args[4]).intValue();
+                    int disabled = ((Number) p.args[5]).intValue();
+                    String identity = (pkg + " " + activity).toLowerCase(java.util.Locale.US);
+                    if (identity.contains("setting") || identity.contains("setup")) {
+                        if (enabled != 0) setupIds.add(enabled);
+                        if (disabled != 0) setupIds.add(disabled);
+                        mod.log("RC8 Setup candidate " + pkg + "/" + activity
+                                + " enabled=0x" + Integer.toHexString(enabled)
+                                + " disabled=0x" + Integer.toHexString(disabled));
+                    } else {
+                        mod.log("RC8 factory entry " + pkg + "/" + activity
+                                + " enabled=0x" + Integer.toHexString(enabled));
+                    }
+                } catch (Throwable error) {
+                    mod.error("RC8 entry inspection", error);
+                }
+            }
+        });
+        // Existing framework drawable point: replace only IDs observed on Setup.
+        mod.hook(null, "framework.resources.get_drawable", new MethodHook() {
+            @Override protected void afterHookedMethod(Param p) {
+                if (p.hasThrowable() || !mod.settingBoolean("enable_overrides", true)) return;
+                try {
+                    int id = ((Number) p.args[0]).intValue();
+                    if (!setupIds.contains(id)) return;
+                    Resources res = (Resources) p.thisObject;
+                    setupRequests++;
+                    // Resource IDs can overlap between packages. Log the resource
+                    // owner; only replace launcher-owned resource IDs.
+                    String owner = res.getResourcePackageName(id);
+                    if (!"com.android.launcher3".equals(owner)) {
+                        if (setupRequests <= 20)
+                            mod.log("RC8 Setup skipped resource owner=" + owner);
+                        return;
+                    }
+                    p.setResult(new BitmapDrawable(res, renderSetupTest()));
+                    setupReplacements++;
+                    if (setupReplacements <= 20)
+                        mod.log("RC8 Setup drawable replaced id=0x" + Integer.toHexString(id));
+                } catch (Throwable error) {
+                    mod.error("RC8 Setup drawable probe", error);
+                }
+            }
+        });
+        mod.hook(app.classLoader, "launcher.menu_list.load", new MethodHook() {
+            @Override protected void afterHookedMethod(Param p) {
+                mod.log("RC8 menu loaded; Setup IDs=" + setupIds.size()
+                        + " drawable requests=" + setupRequests
+                        + " replacements=" + setupReplacements);
+            }
+        });
+
         try {
             Class<?> mods = Class.forName("hmgapi.hook.Mods");
             Method entries = mods.getDeclaredMethod("launcherEntries");
@@ -88,5 +159,41 @@ public final class IconPacks extends ModEntry {
         } catch (Throwable error) {
             mod.error("Failed to apply PNG icon overrides", error);
         }
+    }
+    /** Deliberately conspicuous factory-icon test: purple tile and green check. */
+    private static Bitmap renderSetupTest() {
+        Bitmap bitmap = Bitmap.createBitmap(128, 128, Bitmap.Config.ARGB_8888);
+        Canvas canvas = new Canvas(bitmap);
+        Paint paint = new Paint(Paint.ANTI_ALIAS_FLAG);
+        paint.setColor(Color.rgb(28, 8, 46));
+        canvas.drawRoundRect(new RectF(3, 3, 125, 125), 24, 24, paint);
+        paint.setColor(Color.MAGENTA);
+        paint.setStyle(Paint.Style.STROKE);
+        paint.setStrokeWidth(8);
+        canvas.drawRoundRect(new RectF(6, 6, 122, 122), 22, 22, paint);
+        paint.setStyle(Paint.Style.FILL);
+        paint.setColor(Color.WHITE);
+        Path gear = new Path();
+        for (int i = 0; i < 32; i++) {
+            double angle = 2 * Math.PI * i / 32 - Math.PI / 2;
+            float radius = (i % 4 == 0 || i % 4 == 3) ? 43 : 34;
+            float x = 64 + (float) Math.cos(angle) * radius;
+            float y = 64 + (float) Math.sin(angle) * radius;
+            if (i == 0) gear.moveTo(x, y); else gear.lineTo(x, y);
+        }
+        gear.close();
+        canvas.drawPath(gear, paint);
+        paint.setColor(Color.rgb(28, 8, 46));
+        canvas.drawCircle(64, 64, 22, paint);
+        paint.setColor(Color.GREEN);
+        paint.setStyle(Paint.Style.STROKE);
+        paint.setStrokeWidth(9);
+        paint.setStrokeCap(Paint.Cap.ROUND);
+        Path check = new Path();
+        check.moveTo(49, 64);
+        check.lineTo(60, 76);
+        check.lineTo(82, 51);
+        canvas.drawPath(check, paint);
+        return bitmap;
     }
 }

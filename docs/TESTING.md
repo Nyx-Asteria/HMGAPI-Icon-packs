@@ -1,20 +1,20 @@
-# Testing on DL322
+# DL322 testing
 
-## Known-good version
+## Fallback
 
-RC7 displayed all four HMG-API-managed custom icons on the Kia K5 DL322. The cleaned PNG-only implementation is not yet verified on the head unit.
+RC7 is the last head-unit-verified build. Its original source and history are preserved at `backup/rc7-before-cleanup`.
 
-1. Open the repository's [GitHub Actions](https://github.com/Nyx-Asteria/HMGAPI-Icon-packs/actions) page.
-2. Download the test artifact for the desired build; check the source branch and version before installing.
-3. Install through the normal HMG-API mod workflow while parked, with a recovery method available.
-4. Verify HMG-API, Tile Manager, Nemesis, and Comfort launcher icons.
-5. Check logs for `Loaded icon`, `Replaced icon for`, and `PNG icon overrides applied`.
-6. Disable or uninstall the mod to restore HMG-API's original icon data.
+## Current test (RC8)
+
+1. Download the installable `hmgapi-icon-packs-1.0.0-rc.8.zip` directly from [Releases](https://github.com/Nyx-Asteria/HMGAPI-Icon-packs/releases) after the workflow succeeds.
+2. Install via HMG-API while parked, with a known recovery method.
+3. Verify HMG-API, Tile Manager, Nemesis, and Comfort still show custom icons.
+4. Look for a purple/magenta Setup icon with a white gear and green checkmark.
+5. Collect logs containing `RC8 Setup candidate`, `RC8 Setup drawable replaced`, and `RC8 menu loaded`.
+6. If the factory icon does not change, keep the logs: the probe may reveal which icon IDs were observed.
+
+RC8 uses only existing HMG-API points; it does not modify system APKs.
 
 ## Signing
 
-CI packages use disposable signing keys. A future release must use a persistent author signing key (`MOD_KEY`) so updates retain the same identity. No persistent-key release workflow is configured.
-
-## Factory icons
-
-The RC8 branch is an experimental investigation. Factory icon replacement has not been demonstrated, and no system APKs should be modified.
+CI uses a temporary signing key for every build. These packages are not stable releases and may not update in place across different runs. A permanent author key and release signing workflow are not yet configured.
