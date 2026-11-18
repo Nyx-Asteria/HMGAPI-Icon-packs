@@ -1,13 +1,13 @@
 {
   "id": "hmgapi-icon-packs",
-  "name": "HMGAPI Icon Packs (POC)",
-  "version": "0.1.0-rc.2",
+  "name": "HMGAPI Icon Packs",
+  "version": "1.0.0-rc.4",
   "hmgapi": ">=1.1.0-rc.3",
   "authors": [
     "Nyx-Asteria"
   ],
   "license": "MIT",
-  "description": "Runtime launcher icon replacement POC for HMG-API, Tile Manager and Nemesis.",
+  "description": "Experimental Gen5W launcher icon overrides with focused drawable diagnostics.",
   "hooks": {
     "jar": "hooks.jar",
     "entry": "hmgapi.iconpacks.IconPacks",
