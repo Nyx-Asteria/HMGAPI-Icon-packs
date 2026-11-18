@@ -1,13 +1,13 @@
 {
   "id": "hmgapi-icon-packs",
-  "name": "HMGAPI Icon Packs (POC)",
-  "version": "0.1.0-rc.3",
+  "name": "HMGAPI Icon Packs",
+  "version": "1.0.0-rc.4",
   "hmgapi": ">=1.1.0-rc.3",
   "authors": [
     "Nyx-Asteria"
   ],
   "license": "MIT",
-  "description": "Diagnostic build logging drawable callbacks and icon replacement attempts.",
+  "description": "Experimental Gen5W launcher icon overrides with focused drawable diagnostics.",
   "hooks": {
     "jar": "hooks.jar",
     "entry": "hmgapi.iconpacks.IconPacks",
