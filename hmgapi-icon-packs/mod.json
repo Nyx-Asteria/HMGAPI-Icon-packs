@@ -1,18 +1,19 @@
 {
   "id": "hmgapi-icon-packs",
   "name": "HMGAPI Icon Packs (POC)",
-  "version": "0.1.0",
+  "version": "0.1.0-rc.2",
   "hmgapi": ">=1.1.0-rc.3",
   "authors": [
     "Nyx-Asteria"
   ],
   "license": "MIT",
-  "description": "Diagnostic proof of concept for mapping Gen5W launcher entries to package names and icon resource IDs. Does not replace icons yet.",
+  "description": "Runtime launcher icon replacement POC for HMG-API, Tile Manager and Nemesis.",
   "hooks": {
     "jar": "hooks.jar",
     "entry": "hmgapi.iconpacks.IconPacks",
     "points": {
-      "launcher.menu_entry.new": "observe"
+      "launcher.menu_entry.new": "observe",
+      "framework.resources.get_drawable": "replace"
     }
   }
 }
