@@ -5,14 +5,14 @@
       "key": "enable_overrides",
       "type": "boolean",
       "default": true,
-      "title": "Replace three launcher icons",
+      "title": "Replace four launcher icons",
       "apply": "rebuild"
     },
     {
       "key": "verbose_logging",
       "type": "boolean",
       "default": true,
-      "title": "Log launcher icon mappings",
+      "title": "Log drawable diagnostics",
       "apply": "rebuild"
     }
   ]
