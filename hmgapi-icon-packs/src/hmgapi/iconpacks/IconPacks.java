@@ -64,7 +64,7 @@ public final class IconPacks extends ModEntry {
                     int kind = kindOf(pkg);
                     if (kind >= 0) {
                         constructorCount++;
-                        int originalNormal = 0x7f7e0001 + kind * 3;
+                        int originalNormal = kind == 0 ? 0x7f7e0001 : kind == 1 ? 0x7f7e0007 : kind == 2 ? 0x7f7e000a : 0x7f7e0004;
                         int originalDisabled = originalNormal + 1;
                         int newNormal = CUSTOM_BASE + kind * 2 + 1;
                         int newDisabled = newNormal + 1;
