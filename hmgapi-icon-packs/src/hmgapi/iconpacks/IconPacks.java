@@ -15,9 +15,11 @@ import hmgapi.hook.MethodHook;
 import hmgapi.hook.ModContext;
 import hmgapi.hook.ModEntry;
 import java.util.concurrent.ConcurrentHashMap;
+import java.lang.reflect.Field;
+import java.lang.reflect.Modifier;
 
 /**
- * RC3: runtime icon replacement with focused drawable diagnostics.
+ * RC6: runtime icon replacement with focused drawable diagnostics.
  * Art is drawn as native gradients (no image file I/O from the launcher UID).
  */
 public final class IconPacks extends ModEntry {
@@ -28,12 +30,14 @@ public final class IconPacks extends ModEntry {
     private int afterCount;
     private int redirectedCount;
     private int syntheticCount;
+    private int fieldRewriteCount;
+    private int constructorCount;
     private static final int CUSTOM_BASE = 0x7f7d0000;
 
     @Override public void appLoaded(final ModContext mod, LoadedApp app) {
         if (!"com.android.launcher3".equals(app.packageName) || hooked) return;
         hooked = true;
-        mod.log("RC5 multi-path icon experiment active");
+        mod.log("RC6 multi-path icon experiment active");
         mod.hook(app.classLoader, "launcher.menu_entry.new", new MethodHook() {
             @Override protected void beforeHookedMethod(Param p) {
                 try {
@@ -57,7 +61,35 @@ public final class IconPacks extends ModEntry {
                     int disabled = ((Number) p.args[5]).intValue();
                     entries.put(icon, pkg);
                     entries.put(disabled, pkg);
-                    // Keep the ID-to-package mapping for replacement; no repeated discovery logs.
+                    int kind = kindOf(pkg);
+                    if (kind >= 0) {
+                        constructorCount++;
+                        int originalNormal = 0x7f7e0001 + kind * 3;
+                        int originalDisabled = originalNormal + 1;
+                        int newNormal = CUSTOM_BASE + kind * 2 + 1;
+                        int newDisabled = newNormal + 1;
+                        int seenOriginal = 0;
+                        int seenCustom = 0;
+                        for (Class<?> cls = p.thisObject.getClass(); cls != null; cls = cls.getSuperclass()) {
+                            for (Field f : cls.getDeclaredFields()) {
+                                if (Modifier.isStatic(f.getModifiers()) || f.getType() != int.class) continue;
+                                try {
+                                    f.setAccessible(true);
+                                    int value = f.getInt(p.thisObject);
+                                    if (value == newNormal || value == newDisabled) seenCustom++;
+                                    if (value == originalNormal || value == originalDisabled) {
+                                        seenOriginal++;
+                                        f.setInt(p.thisObject, value == originalNormal ? newNormal : newDisabled);
+                                        fieldRewriteCount++;
+                                        mod.log("PATH E field redirected " + pkg + " field=" + f.getName());
+                                    }
+                                } catch (Throwable t) { mod.error("PATH E field probe", t); }
+                            }
+                        }
+                        if (constructorCount <= 16)
+                            mod.log("PATH E inspected " + pkg + " customFields=" + seenCustom
+                                + " originalFields=" + seenOriginal + " rewrites=" + fieldRewriteCount);
+                    }
                 } catch (Throwable t) { mod.error("entry mapping", t); }
             }
         });
@@ -117,10 +149,11 @@ public final class IconPacks extends ModEntry {
             @Override protected void afterHookedMethod(Param p) {
                 mod.log("PATH D menu load completed; redirects=" + redirectedCount
                         + " custom drawable requests=" + syntheticCount
-                        + " ordinary drawable requests=" + afterCount);
+                        + " ordinary drawable requests=" + afterCount
+                        + " field rewrites=" + fieldRewriteCount);
             }
         });
-        mod.log("RC5 drawable resolver and menu-load observer installed");
+        mod.log("RC6 drawable resolver and field inspector installed");
     }
 
     private static int kindOf(String pkg) {
