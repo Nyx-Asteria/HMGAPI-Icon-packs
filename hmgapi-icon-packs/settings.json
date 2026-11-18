@@ -5,7 +5,14 @@
       "key": "enable_overrides",
       "type": "boolean",
       "default": true,
-      "title": "Replace HMG-API launcher icons",
+      "title": "Enable icon replacements",
+      "apply": "rebuild"
+    },
+    {
+      "key": "hyundai_style",
+      "type": "boolean",
+      "default": false,
+      "title": "Hyundai icon pack (off = Kia)",
       "apply": "rebuild"
     }
   ]

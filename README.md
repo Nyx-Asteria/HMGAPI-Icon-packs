@@ -1,30 +1,18 @@
 # HMGAPI Icon Packs
 
-Runtime icon replacement for HMG-API-managed launcher tiles on Hyundai/Kia/Genesis Gen5W systems.
+## RC9 — integrated Kia / Hyundai theme preview
 
-**RC7** was tested on a Kia K5 DL322 and successfully displayed four custom PNG icons. **RC8** is an unverified experiment to replace the factory Setup icon using only existing HMG-API hooks.
+RC9 adds a **Hyundai icon pack** toggle in HMG-API mod settings. Off = Kia, on = Hyundai. The setting applies on rebuild/restart; it is not a live theme switch.
 
-## Included icons
+- Replaces six HMG-API-managed mod icons: HMG-API, Tile Manager, NEMESIS, Comfort, Button Mapper, and Brake Indicator.
+- Uses existing `launcher.menu_entry.new`, `launcher.menu_list.load`, and `framework.resources.get_drawable` points to identify and replace recognized factory icons.
+- Distinguishes Setup vs User's Manual and Map vs Navigation Menu by activity name.
+- No factory APK modifications or new HMG-API points.
+- Preserves the four tested RC7 Kia PNG assets; new plugin icons and factory artwork are generated vector previews at runtime.
+- Hyundai uses blue/cyan/green gradients on **transparent backgrounds**; Kia uses cyan/violet/magenta. Setup uses the cog rather than the RC8 test checkmark.
 
-- HMG-API — dashboard
-- Tile Manager — tiles and checkmark
-- Nemesis — settings cog
-- Comfort — heated seat
+**Important:** This is an *experimental integrated build*, not a pixel-perfect export of the approved concept sheets. Factory coverage depends on matching entry identities and the drawable resource owner. Unmatched entries retain their stock icons. The Hyundai style is an original interpretation, not extracted OEM artwork.
 
-SVG artwork and 64×64 transparent PNG assets are in `hmgapi-icon-packs/icons/`.
+The last head-unit-confirmed factory replacement is RC8; the frozen RC7 fallback is at `backup/rc7-before-cleanup`.
 
-## Branch policy
-
-- **main:** current experimental build; GitHub Actions builds this branch
-- **backup/rc7-before-cleanup:** frozen, known-good RC7 source and original history
-- **cleanup/png-engine:** clean PNG-only baseline for reference
-
-## Downloads
-
-Use [Releases](https://github.com/Nyx-Asteria/HMGAPI-Icon-packs/releases) for the **direct installable ZIP**. Builds are experimental and use temporary CI signing keys, not a permanent author signature. GitHub Actions also retains its internal SDK test artifact.
-
-## How it works
-
-The mod preloads PNGs at zygote startup and replaces HMG-API's in-memory launcher icon bytes. RC8 additionally observes factory launcher entries and attempts to replace the Setup drawable via existing mapped hooks. No factory APKs are modified.
-
-See [testing instructions](docs/TESTING.md).
+[Download test builds from Releases](https://github.com/Nyx-Asteria/HMGAPI-Icon-packs/releases). CI uses temporary signatures.
