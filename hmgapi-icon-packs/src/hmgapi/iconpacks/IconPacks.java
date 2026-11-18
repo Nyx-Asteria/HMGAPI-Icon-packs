@@ -67,6 +67,17 @@ public final class IconPacks extends ModEntry {
             @Override protected void beforeHookedMethod(Param p) {
                 try {
                     int id = ((Number) p.args[0]).intValue();
+                    if ((id & 0xffffff00) == CUSTOM_BASE) {
+                        int kind = (id - CUSTOM_BASE - 1) / 2;
+                        if (kind >= 0 && kind < 4) {
+                            p.setResult(new BitmapDrawable((Resources) p.thisObject, render(kind)));
+                            syntheticCount++;
+                            if (syntheticCount <= 16)
+                                mod.log("PATH B served custom drawable " + packageOf(kind)
+                                    + " id=0x" + Integer.toHexString(id));
+                            return;
+                        }
+                    }
                     String pkg = entries.get(id);
                     if (beforeCount++ < 4 || (pkg != null && beforeCount <= 40))
                         mod.log("DIAG BEFORE id=0x" + Integer.toHexString(id)
@@ -97,11 +108,7 @@ public final class IconPacks extends ModEntry {
                     Bitmap image = render(kind);
                     Resources res = (Resources) p.thisObject;
                     p.setResult(new BitmapDrawable(res, image));
-                    if ((id & 0xffffff00) == CUSTOM_BASE) {
-                        syntheticCount++;
-                        if (syntheticCount <= 12)
-                            mod.log("PATH B synthetic drawable served " + pkg + " id=0x" + Integer.toHexString(id));
-                    } else if (mod.settingBoolean("verbose_logging", true))
+                    if ((id & 0xffffff00) != CUSTOM_BASE && mod.settingBoolean("verbose_logging", true))
                         mod.log("PATH C legacy drawable replaced " + pkg + " id=0x" + Integer.toHexString(id));
                 } catch (Throwable t) { mod.error("icon replacement", t); }
             }
