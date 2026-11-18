@@ -1,18 +1,17 @@
 {
   "id": "hmgapi-icon-packs",
   "name": "HMGAPI Icon Packs",
-  "version": "1.0.0-rc.6",
+  "version": "1.0.0-rc.7",
   "hmgapi": ">=1.1.0-rc.3",
   "authors": [
     "Nyx-Asteria"
   ],
   "license": "MIT",
-  "description": "Experimental launcher icon overrides with constructor, stored-field and drawable diagnostics.",
+  "description": "PNG-first launcher icon override via HMG-API in-memory icon bytes; Canvas fallback.",
   "hooks": {
     "jar": "hooks.jar",
     "entry": "hmgapi.iconpacks.IconPacks",
     "points": {
-      "launcher.menu_entry.new": "change",
       "framework.resources.get_drawable": "replace",
       "launcher.menu_list.load": "observe"
     }
