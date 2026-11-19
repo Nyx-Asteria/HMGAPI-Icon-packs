@@ -36,11 +36,13 @@ public final class IconPacks extends ModEntry {
     private boolean initialized;
     private final java.util.Map<Integer, String> factoryIds = new java.util.HashMap<Integer, String>();
     private boolean hyundai;
+    private byte[] carplayPng;
     private int factoryReplacements;
 
     @Override public void zygoteInit(ModContext mod) {
         hyundai = "hyundai".equals(mod.settingString("icon_pack", "kia"));
         mod.log("Icon pack selected: " + (hyundai ? "hyundai" : "kia"));
+        carplayPng = loadCarplay(mod);
         for (int i = 0; i < NAMES.length; i++) {
             File file = new File(mod.dir, "icons/" + (hyundai ? "hyundai" : "kia")
                     + "/" + NAMES[i] + ".png");
@@ -64,6 +66,26 @@ public final class IconPacks extends ModEntry {
             } catch (Throwable error) {
                 mod.error("Cannot load icon " + NAMES[i], error);
             }
+        }
+    }
+
+    private byte[] loadCarplay(ModContext mod) {
+        File file = new File(mod.dir, "icons/" + (hyundai ? "hyundai" : "kia") + "/carplay.png");
+        try {
+            FileInputStream in = new FileInputStream(file);
+            ByteArrayOutputStream out = new ByteArrayOutputStream();
+            try {
+                byte[] buf = new byte[8192]; int n;
+                while ((n = in.read(buf)) != -1) out.write(buf, 0, n);
+            } finally { in.close(); }
+            byte[] png = out.toByteArray();
+            if (png.length < 8 || png[0] != (byte)137 || png[1] != 80
+                    || png[2] != 78 || png[3] != 71) throw new IllegalStateException("Not PNG");
+            mod.log("Loaded CarPlay icon (" + png.length + " bytes)");
+            return png;
+        } catch (Throwable error) {
+            mod.log("CarPlay icon unavailable; leaving OEM projection artwork unchanged");
+            return null;
         }
     }
 
@@ -106,6 +128,16 @@ public final class IconPacks extends ModEntry {
                     String key = factoryIds.get(id);
                     if (key == null) return;
                     Resources res = (Resources) p.thisObject;
+                    // Phone Projection also hosts Android Auto. Never replace its shared tile.
+                    if ("projection".equals(key)) {
+                        if (carplayPng == null) return;
+                        String resourceName = res.getResourceEntryName(id).toLowerCase(java.util.Locale.US);
+                        if (!resourceName.contains("carplay") && !resourceName.contains("carpay")) return;
+                        android.graphics.Bitmap bmp = android.graphics.BitmapFactory.decodeByteArray(
+                                carplayPng, 0, carplayPng.length);
+                        if (bmp != null) p.setResult(new BitmapDrawable(res, bmp));
+                        return;
+                    }
                     if (!"com.android.launcher3".equals(res.getResourcePackageName(id))) return;
                     p.setResult(new BitmapDrawable(res, drawIcon(key, hyundai)));
                     factoryReplacements++;
