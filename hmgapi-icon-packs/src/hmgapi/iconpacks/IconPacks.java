@@ -27,10 +27,10 @@ import java.util.List;
  * Patch HMG-API LauncherEntry icon byte arrays in the launcher process.
  */
 public final class IconPacks extends ModEntry {
-    private static final String[] NAMES = {"hmgapi", "tiles", "nemesis", "comfort", "buttonmapper", "brakeindicator"};
+    private static final String[] NAMES = {"hmgapi", "tiles", "nemesis", "comfort", "buttonmapper", "brakeindicator", "lightstudio"};
     private static final String[] PACKAGES = {
         "hmgapi.app", "dev.lemoyne.tiles", "com.nemesis.manager", "dev.lemoyne.comfort",
-        "com.deflight.buttonmapper", "dev.lemoyne.brakeindicator"
+        "com.deflight.buttonmapper", "dev.lemoyne.brakeindicator", "com.deflight.lightstudio"
     };
     private final byte[][] pictures = new byte[NAMES.length][];
     private boolean initialized;
