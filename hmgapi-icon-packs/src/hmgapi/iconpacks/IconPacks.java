@@ -47,6 +47,11 @@ public final class IconPacks extends ModEntry {
     private byte[] navigationPng;
     private byte[] phonePng;
     private byte[] voicememoPng;
+    private byte[] radioPng;
+    private byte[] mediaPng;
+    private byte[] hddataPng;
+    private byte[] climatePng;
+    private byte[] kiaconnectPng;
     private int factoryReplacements;
 
     @Override public void zygoteInit(ModContext mod) {
@@ -63,6 +68,11 @@ public final class IconPacks extends ModEntry {
         navigationPng = loadProjectionIcon(mod, "navigation");
         phonePng = loadProjectionIcon(mod, "phone");
         voicememoPng = loadProjectionIcon(mod, "voicememo");
+        radioPng = loadProjectionIcon(mod, "radio");
+        mediaPng = loadProjectionIcon(mod, "media");
+        hddataPng = loadProjectionIcon(mod, "hddata");
+        climatePng = loadProjectionIcon(mod, "climate");
+        kiaconnectPng = loadProjectionIcon(mod, "kiaconnect");
         for (int i = 0; i < NAMES.length; i++) {
             File file = new File(mod.dir, "icons/" + (hyundai ? "hyundai" : "kia")
                     + "/" + NAMES[i] + ".png");
@@ -181,12 +191,19 @@ public final class IconPacks extends ModEntry {
                             : "map".equals(key) ? mapPng
                             : "navigation".equals(key) ? navigationPng
                             : "phone".equals(key) ? phonePng
-                            : "voicememo".equals(key) ? voicememoPng : null;
+                            : "voicememo".equals(key) ? voicememoPng
+                            : "radio".equals(key) ? radioPng
+                            : "media".equals(key) ? mediaPng
+                            : "hddata".equals(key) ? hddataPng
+                            : "climate".equals(key) ? climatePng
+                            : "kiaconnect".equals(key) ? kiaconnectPng : null;
                     if ("setup".equals(key) || "manual".equals(key)
                             || "projection".equals(key) || "notifications".equals(key)
                             || "valet".equals(key) || "map".equals(key)
                             || "navigation".equals(key) || "phone".equals(key)
-                            || "voicememo".equals(key)) {
+                            || "voicememo".equals(key) || "radio".equals(key)
+                            || "media".equals(key) || "hddata".equals(key)
+                            || "climate".equals(key) || "kiaconnect".equals(key)) {
                         // Keep the OEM artwork if the corresponding PNG is unavailable.
                         if (factoryPng == null) return;
                         android.graphics.Bitmap bitmap = android.graphics.BitmapFactory.decodeByteArray(
