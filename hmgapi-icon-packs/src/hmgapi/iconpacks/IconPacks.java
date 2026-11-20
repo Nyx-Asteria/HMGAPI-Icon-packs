@@ -36,11 +36,43 @@ public final class IconPacks extends ModEntry {
     private boolean initialized;
     private final java.util.Map<Integer, String> factoryIds = new java.util.HashMap<Integer, String>();
     private boolean hyundai;
+    private byte[] carplayPng;
+    private byte[] androidAutoPng;
+    private byte[] setupPng;
+    private byte[] manualPng;
+    private byte[] projectionPng;
+    private byte[] notificationsPng;
+    private byte[] valetPng;
+    private byte[] mapPng;
+    private byte[] navigationPng;
+    private byte[] phonePng;
+    private byte[] voicememoPng;
+    private byte[] radioPng;
+    private byte[] mediaPng;
+    private byte[] hddataPng;
+    private byte[] climatePng;
+    private byte[] kiaconnectPng;
     private int factoryReplacements;
 
     @Override public void zygoteInit(ModContext mod) {
         hyundai = "hyundai".equals(mod.settingString("icon_pack", "kia"));
         mod.log("Icon pack selected: " + (hyundai ? "hyundai" : "kia"));
+        carplayPng = loadProjectionIcon(mod, "carplay");
+        androidAutoPng = loadProjectionIcon(mod, "androidauto");
+        setupPng = loadProjectionIcon(mod, "setup");
+        manualPng = loadProjectionIcon(mod, "manual");
+        projectionPng = loadProjectionIcon(mod, "projection");
+        notificationsPng = loadProjectionIcon(mod, "notifications");
+        valetPng = loadProjectionIcon(mod, "valet");
+        mapPng = loadProjectionIcon(mod, "map");
+        navigationPng = loadProjectionIcon(mod, "navigation");
+        phonePng = loadProjectionIcon(mod, "phone");
+        voicememoPng = loadProjectionIcon(mod, "voicememo");
+        radioPng = loadProjectionIcon(mod, "radio");
+        mediaPng = loadProjectionIcon(mod, "media");
+        hddataPng = loadProjectionIcon(mod, "hddata");
+        climatePng = loadProjectionIcon(mod, "climate");
+        kiaconnectPng = loadProjectionIcon(mod, "kiaconnect");
         for (int i = 0; i < NAMES.length; i++) {
             File file = new File(mod.dir, "icons/" + (hyundai ? "hyundai" : "kia")
                     + "/" + NAMES[i] + ".png");
@@ -64,6 +96,26 @@ public final class IconPacks extends ModEntry {
             } catch (Throwable error) {
                 mod.error("Cannot load icon " + NAMES[i], error);
             }
+        }
+    }
+
+    private byte[] loadProjectionIcon(ModContext mod, String iconName) {
+        File file = new File(mod.dir, "icons/" + (hyundai ? "hyundai" : "kia") + "/" + iconName + ".png");
+        try {
+            FileInputStream in = new FileInputStream(file);
+            ByteArrayOutputStream out = new ByteArrayOutputStream();
+            try {
+                byte[] buf = new byte[8192]; int n;
+                while ((n = in.read(buf)) != -1) out.write(buf, 0, n);
+            } finally { in.close(); }
+            byte[] png = out.toByteArray();
+            if (png.length < 8 || png[0] != (byte)137 || png[1] != 80
+                    || png[2] != 78 || png[3] != 71) throw new IllegalStateException("Not PNG");
+            mod.log("Loaded " + iconName + " icon (" + png.length + " bytes)");
+            return png;
+        } catch (Throwable error) {
+            mod.log(iconName + " icon unavailable; leaving OEM projection artwork unchanged");
+            return null;
         }
     }
 
@@ -103,11 +155,64 @@ public final class IconPacks extends ModEntry {
                 if (p.hasThrowable() || !mod.settingBoolean("enable_overrides", true)) return;
                 try {
                     int id = ((Number) p.args[0]).intValue();
+                    Resources res = (Resources) p.thisObject;
+                    // Identify CarPlay and Android Auto by their OWN drawable resource
+                    // names, not the shared Phone Projection menu-entry package.
+                    // This also works when the projection menu entry has a generic icon.
+                    String resourceName = res.getResourceEntryName(id).toLowerCase(java.util.Locale.US);
+                    String resourcePackage = res.getResourcePackageName(id);
+                    if ("com.android.launcher3".equals(resourcePackage)) {
+                        byte[] projectionPng = null;
+                        if (resourceName.contains("carplay") || resourceName.contains("carpay")) {
+                            projectionPng = carplayPng;
+                        } else if (resourceName.contains("androidauto")
+                                || resourceName.contains("android_auto")
+                                || resourceName.contains("android_66")) {
+                            projectionPng = androidAutoPng;
+                        }
+                        if (projectionPng != null) {
+                            android.graphics.Bitmap bmp = android.graphics.BitmapFactory.decodeByteArray(
+                                    projectionPng, 0, projectionPng.length);
+                            if (bmp != null) {
+                                p.setResult(new BitmapDrawable(res, bmp));
+                                factoryReplacements++;
+                            }
+                            return;
+                        }
+                    }
                     String key = factoryIds.get(id);
                     if (key == null) return;
-                    Resources res = (Resources) p.thisObject;
-                    if (!"com.android.launcher3".equals(res.getResourcePackageName(id))) return;
-                    p.setResult(new BitmapDrawable(res, drawIcon(key, hyundai)));
+                    if (!"com.android.launcher3".equals(resourcePackage)) return;
+                    byte[] factoryPng = "setup".equals(key) ? setupPng
+                            : "manual".equals(key) ? manualPng
+                            : "projection".equals(key) ? projectionPng
+                            : "notifications".equals(key) ? notificationsPng
+                            : "valet".equals(key) ? valetPng
+                            : "map".equals(key) ? mapPng
+                            : "navigation".equals(key) ? navigationPng
+                            : "phone".equals(key) ? phonePng
+                            : "voicememo".equals(key) ? voicememoPng
+                            : "radio".equals(key) ? radioPng
+                            : "media".equals(key) ? mediaPng
+                            : "hddata".equals(key) ? hddataPng
+                            : "climate".equals(key) ? climatePng
+                            : "kiaconnect".equals(key) ? kiaconnectPng : null;
+                    if ("setup".equals(key) || "manual".equals(key)
+                            || "projection".equals(key) || "notifications".equals(key)
+                            || "valet".equals(key) || "map".equals(key)
+                            || "navigation".equals(key) || "phone".equals(key)
+                            || "voicememo".equals(key) || "radio".equals(key)
+                            || "media".equals(key) || "hddata".equals(key)
+                            || "climate".equals(key) || "kiaconnect".equals(key)) {
+                        // Keep the OEM artwork if the corresponding PNG is unavailable.
+                        if (factoryPng == null) return;
+                        android.graphics.Bitmap bitmap = android.graphics.BitmapFactory.decodeByteArray(
+                                factoryPng, 0, factoryPng.length);
+                        if (bitmap == null) return;
+                        p.setResult(new BitmapDrawable(res, bitmap));
+                    } else {
+                        p.setResult(new BitmapDrawable(res, drawIcon(key, hyundai)));
+                    }
                     factoryReplacements++;
                     if (factoryReplacements <= 50)
                         mod.log("RC9 factory replaced " + key + " id=0x" + Integer.toHexString(id));

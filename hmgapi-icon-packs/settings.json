@@ -17,11 +17,11 @@
       "options": [
         {
           "value": "kia",
-          "title": "Kia — neon outline"
+          "title": "Kia — cyan to magenta"
         },
         {
           "value": "hyundai",
-          "title": "Hyundai — blue to green"
+          "title": "Hyundai — cyan to green"
         }
       ],
       "apply": "rebuild"
