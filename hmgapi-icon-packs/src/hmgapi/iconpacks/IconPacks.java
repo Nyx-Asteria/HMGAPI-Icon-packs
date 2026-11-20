@@ -38,6 +38,9 @@ public final class IconPacks extends ModEntry {
     private boolean hyundai;
     private byte[] carplayPng;
     private byte[] androidAutoPng;
+    private byte[] setupPng;
+    private byte[] manualPng;
+    private byte[] projectionPng;
     private int factoryReplacements;
 
     @Override public void zygoteInit(ModContext mod) {
@@ -45,6 +48,9 @@ public final class IconPacks extends ModEntry {
         mod.log("Icon pack selected: " + (hyundai ? "hyundai" : "kia"));
         carplayPng = loadProjectionIcon(mod, "carplay");
         androidAutoPng = loadProjectionIcon(mod, "androidauto");
+        setupPng = loadProjectionIcon(mod, "setup");
+        manualPng = loadProjectionIcon(mod, "manual");
+        projectionPng = loadProjectionIcon(mod, "projection");
         for (int i = 0; i < NAMES.length; i++) {
             File file = new File(mod.dir, "icons/" + (hyundai ? "hyundai" : "kia")
                     + "/" + NAMES[i] + ".png");
@@ -153,9 +159,22 @@ public final class IconPacks extends ModEntry {
                         }
                     }
                     String key = factoryIds.get(id);
-                    if (key == null || "projection".equals(key)) return;
-                    if (!"com.android.launcher3".equals(res.getResourcePackageName(id))) return;
-                    p.setResult(new BitmapDrawable(res, drawIcon(key, hyundai)));
+                    if (key == null) return;
+                    if (!"com.android.launcher3".equals(resourcePackage)) return;
+                    byte[] factoryPng = "setup".equals(key) ? setupPng
+                            : "manual".equals(key) ? manualPng
+                            : "projection".equals(key) ? projectionPng : null;
+                    if ("setup".equals(key) || "manual".equals(key)
+                            || "projection".equals(key)) {
+                        // Keep the OEM artwork if the corresponding PNG is unavailable.
+                        if (factoryPng == null) return;
+                        android.graphics.Bitmap bitmap = android.graphics.BitmapFactory.decodeByteArray(
+                                factoryPng, 0, factoryPng.length);
+                        if (bitmap == null) return;
+                        p.setResult(new BitmapDrawable(res, bitmap));
+                    } else {
+                        p.setResult(new BitmapDrawable(res, drawIcon(key, hyundai)));
+                    }
                     factoryReplacements++;
                     if (factoryReplacements <= 50)
                         mod.log("RC9 factory replaced " + key + " id=0x" + Integer.toHexString(id));
