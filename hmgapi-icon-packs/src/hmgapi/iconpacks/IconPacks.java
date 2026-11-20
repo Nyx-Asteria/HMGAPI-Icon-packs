@@ -44,6 +44,9 @@ public final class IconPacks extends ModEntry {
     private byte[] notificationsPng;
     private byte[] valetPng;
     private byte[] mapPng;
+    private byte[] navigationPng;
+    private byte[] phonePng;
+    private byte[] voicememoPng;
     private int factoryReplacements;
 
     @Override public void zygoteInit(ModContext mod) {
@@ -57,6 +60,9 @@ public final class IconPacks extends ModEntry {
         notificationsPng = loadProjectionIcon(mod, "notifications");
         valetPng = loadProjectionIcon(mod, "valet");
         mapPng = loadProjectionIcon(mod, "map");
+        navigationPng = loadProjectionIcon(mod, "navigation");
+        phonePng = loadProjectionIcon(mod, "phone");
+        voicememoPng = loadProjectionIcon(mod, "voicememo");
         for (int i = 0; i < NAMES.length; i++) {
             File file = new File(mod.dir, "icons/" + (hyundai ? "hyundai" : "kia")
                     + "/" + NAMES[i] + ".png");
@@ -172,10 +178,15 @@ public final class IconPacks extends ModEntry {
                             : "projection".equals(key) ? projectionPng
                             : "notifications".equals(key) ? notificationsPng
                             : "valet".equals(key) ? valetPng
-                            : "map".equals(key) ? mapPng : null;
+                            : "map".equals(key) ? mapPng
+                            : "navigation".equals(key) ? navigationPng
+                            : "phone".equals(key) ? phonePng
+                            : "voicememo".equals(key) ? voicememoPng : null;
                     if ("setup".equals(key) || "manual".equals(key)
                             || "projection".equals(key) || "notifications".equals(key)
-                            || "valet".equals(key) || "map".equals(key)) {
+                            || "valet".equals(key) || "map".equals(key)
+                            || "navigation".equals(key) || "phone".equals(key)
+                            || "voicememo".equals(key)) {
                         // Keep the OEM artwork if the corresponding PNG is unavailable.
                         if (factoryPng == null) return;
                         android.graphics.Bitmap bitmap = android.graphics.BitmapFactory.decodeByteArray(
